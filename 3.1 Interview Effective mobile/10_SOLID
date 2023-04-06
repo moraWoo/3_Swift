@@ -1,0 +1,149 @@
+#SOLID
+
+SOLID - это акроним, который описывает пять основных принципов проектирования программного обеспечения, которые помогают создавать более гибкие, расширяемые и легко поддерживаемые системы. Вот краткое объяснение каждого из принципов:
+
+1. Single Responsibility Principle (Принцип единственной ответственности) - класс должен иметь только одну причину для изменения. Это означает, что каждый класс должен быть ответственен только за одну функцию или задачу, и не должен выполнять слишком много разных вещей. Это упрощает поддержку и тестирование кода.
+
+class FileManager {
+    func readFile(atPath path: String) -> Data? {
+        // Чтение файла из файловой системы
+        return nil
+    }
+
+    func saveFile(data: Data, atPath path: String) {
+        // Сохранение файла в файловую систему
+    }
+}
+
+В этом примере класс FileManager отвечает только за чтение и сохранение файлов. Он не занимается другими задачами, что позволяет ему быть более модульным и легче поддерживаемым.
+
+2. Open/Closed Principle (Принцип открытости/закрытости) - классы должны быть открыты для расширения, но закрыты для изменения. Это означает, что новая функциональность должна добавляться в систему путем расширения существующих классов, а не изменения кода, который уже был написан.
+
+protocol Shape {
+    func area() -> Double
+}
+
+class Rectangle: Shape {
+    var width: Double
+    var height: Double
+
+    init(width: Double, height: Double) {
+        self.width = width
+        self.height = height
+    }
+
+    func area() -> Double {
+        return width * height
+    }
+}
+
+class Circle: Shape {
+    var radius: Double
+
+    init(radius: Double) {
+        self.radius = radius
+    }
+
+    func area() -> Double {
+        return Double.pi * pow(radius, 2)
+    }
+}
+В этом примере классы Rectangle и Circle закрыты для изменения, но открыты для расширения. Если мы захотим добавить новую фигуру, мы можем просто создать новый класс, который реализует протокол Shape, не изменяя существующий код.
+
+3. Liskov Substitution Principle (Принцип подстановки Лисков) - объекты должны быть заменяемыми на свои подтипы, не нарушая работу программы. Это означает, что если вы замените объект на объект из его подтипа, то программа должна продолжать работать без ошибок.
+
+class Animal {
+    func makeSound() -> String {
+        return "Generic animal sound"
+    }
+}
+
+class Dog: Animal {
+    override func makeSound() -> String {
+        return "Woof!"
+    }
+}
+
+class Cat: Animal {
+    override func makeSound() -> String {
+        return "Meow!"
+    }
+}
+
+В этом примере классы Dog и Cat являются подтипами класса Animal, и мы можем использовать их везде, где используется класс Animal, не нарушая работу программы.
+
+4. Interface Segregation Principle (Принцип разделения интерфейса) - клиенты не должны зависеть от методов, которые они не используют. Это означает, что интерфейсы должны быть построены таким образом, чтобы клиенты могли использовать только те методы, которые им действительно нужны.
+
+protocol Vehicle {
+    func start()
+    func stop()
+    func accelerate()
+    func brake()
+}
+
+protocol Car: Vehicle {
+    func changeGear()
+}
+
+class SportsCar: Car {
+    func start() {
+        // Запустить двигатель
+    }
+
+    func stop() {
+        // Остановить двигатель
+    }
+
+    func accelerate() {
+        // Ускорить
+    }
+
+    func brake() {
+        // Затормозить
+    }
+
+    func changeGear() {
+        // Переключить передачу
+    }
+}
+
+В этом примере мы используем протоколы, чтобы разделить интерфейсы на более мелкие части, что позволяет клиентам использовать только те методы которые им действительно нужны. Так, протокол Car является подмножеством протокола Vehicle и добавляет метод changeGear(), который нужен только автомобилям.
+
+5. Dependency Inversion Principle (Принцип инверсии зависимостей) - зависимости должны зависеть от абстракций, а не от конкретных реализаций. Это означает, что модули должны зависеть от абстракций, а не от других модулей, чтобы облегчить замену реализаций в будущем.
+
+protocol Logger {
+    func log(message: String)
+}
+
+class ConsoleLogger: Logger {
+    func log(message: String) {
+        print("Console: \(message)")
+    }
+}
+
+class FileLogger: Logger {
+    func log(message: String) {
+        // Записать лог в файл
+    }
+}
+
+class App {
+    let logger: Logger
+
+    init(logger: Logger) {
+        self.logger = logger
+    }
+
+    func doSomething() {
+        // Делаем что-то
+        logger.log(message: "Событие")
+    }
+}
+
+let consoleLogger = ConsoleLogger()
+let app = App(logger: consoleLogger)
+app.doSomething()
+
+В этом примере класс App зависит от абстракции Logger, а не от конкретной реализации ConsoleLogger или FileLogger. Это позволяет заменить реализацию логгера без изменения кода класса App.
+
+Соблюдение этих принципов помогает упростить и улучшить качество кода, делая его более гибким, легко расширяемым и поддерживаемым в будущем.
