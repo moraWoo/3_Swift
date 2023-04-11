@@ -1,0 +1,87 @@
+
+1. break - используется для прерывания выполнения цикла или switch-блока и перехода к следующему оператору после цикла или switch-блока.
+
+// Пример использования break в цикле for
+for i in 1...5 {
+    if i == 3 {
+        break
+    }
+    print(i) // Выведет 1, 2
+}
+
+// Пример использования break в switch-блоке
+let fruit = "apple"
+switch fruit {
+case "banana":
+    print("This is a banana")
+case "apple":
+    print("This is an apple")
+    break
+default:
+    print("Unknown fruit")
+}
+
+2. continue - используется для пропуска текущей итерации цикла и перехода к следующей итерации.
+
+// Пример использования continue в цикле for
+for i in 1...5 {
+    if i == 3 {
+        continue
+    }
+    print(i) // Выведет 1, 2, 4, 5
+}
+
+3. fallthrough - используется только в switch-блоках для продолжения выполнения кода после выполнения текущего case, даже если не было явного сопоставления значений.
+
+// Пример использования fallthrough в switch-блоке
+let number = 2
+switch number {
+case 1:
+    print("This is one")
+    fallthrough
+case 2:
+    print("This is two") // Выведет "This is two"
+default:
+    print("Unknown number")
+}
+
+4. return - используется для завершения выполнения текущей функции и возврата значения.
+
+// Пример использования return для возврата значения из функции
+func multiply(a: Int, b: Int) -> Int {
+    return a * b
+}
+let result = multiply(a: 2, b: 3) // result будет равен 6
+
+5. throw - используется для генерации исключения.
+
+// Пример использования throw для генерации исключения
+enum MyError: Error {
+    case invalidValue
+}
+
+func checkValue(_ value: Int) throws -> Bool {
+    if value < 0 {
+        throw MyError.invalidValue
+    }
+    return true
+}
+
+do {
+    let value = try checkValue(-1) // Вызовет ошибку
+} catch {
+    print("Error: \(error)") // Выведет "Error: invalidValue"
+}
+
+6. defer - используется для выполнения кода перед выходом из текущей области видимости.
+
+// Пример использования defer для закрытия файла перед выходом из функции
+func readFile() {
+    let file = openFile("file.txt")
+    defer {
+        closeFile(file)
+    }
+    // Код для чтения файла
+}
+
+7. guard - используется для проверки условий и прерывания выполнения функции, если условие не выполнено.

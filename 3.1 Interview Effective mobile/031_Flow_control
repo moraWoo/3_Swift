@@ -1,0 +1,46 @@
+# for in
+
+Цикл for-in используется для итерации по коллекциям элементов, таких как диапазоны чисел, элементы массива или символы в строке.
+
+let names = ["Anna", "Alex", "Brian", "Jack"]
+for name in names {
+    print("Hello, \(name)!")
+}
+
+# while
+
+Цикл while выполняет набор инструкций до тех пор, пока его условие не станет false. Этот вид циклов лучше всего использовать в тех случаях, когда количество итераций до первого входа в цикл неизвестно. Swift предлагает два вида циклов while:
+
+while - вычисляет условие выполнения в начале каждой итерации цикла.
+repeat-while - вычисляет условие выполнения в конце каждой итерации цикла.
+
+# while
+
+while условие {
+  инструкции
+}
+
+# repeat while
+
+repeat {
+  инструкции
+} while условие
+
+# if else
+
+var temperatureInFahrenheit = 30
+if temperatureInFahrenheit <= 32 {
+     print ("It's very cold. Consider wearing a scarf.")
+}
+
+# switch
+
+let someCharacter: Character = "z"
+switch someCharacter {
+case "a":
+    print("The first letter of the alphabet")
+case "z":
+    print("The last letter of the alphabet")
+default:
+    print("Some other character")
+}
