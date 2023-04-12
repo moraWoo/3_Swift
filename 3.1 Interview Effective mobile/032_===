@@ -1,12 +1,28 @@
-Так как классы являются ссылочными типами, то есть возможность сделать так, чтобы несколько констант и переменных ссылались на один единственный экземпляр класса. (Такое поведение не применимо к структурам и перечислениям, так как они копируют значение, когда присваиваются константам или переменным или передаются функциям.)
+В Swift оператор === используется для сравнения двух ссылок на объекты. Он проверяет, указывают ли обе ссылки на один и тот же объект в памяти.
 
 Иногда бывает полезно выяснить ссылаются ли две константы или переменные на один и тот же экземпляр класса. Для проверки этого в Swift есть два оператора тождественности:
 
 Идентичен (===)
 Не идентичен ( !== )
 
-Можно использовать эти операторы для проверки того, ссылаются ли две константы или переменные на один и тот же экземпляр:
+class Person {
+    var name: String
 
-if tenEighty === alsoTenEighty {
-    print("tenEighty and alsoTenEighty refer to the same VideoMode instance.")
+    init(name: String) {
+        self.name = name
+    }
 }
+
+let person1 = Person(name: "John")
+let person2 = person1
+let person3 = Person(name: "John")
+
+print(person1 === person2) // true
+print(person1 === person3) // false
+
+print("person1: \(Unmanaged.passUnretained(person1).toOpaque())")
+//"person1: 0x00006000013bc580\n"
+print("person2: \(Unmanaged.passUnretained(person2).toOpaque())")
+//"person1: 0x00006000013bc580\n"
+print("person3: \(Unmanaged.passUnretained(person3).toOpaque())")
+//"person3: 0x00006000013b0640\n"
