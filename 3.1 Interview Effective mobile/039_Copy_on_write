@@ -1,0 +1,29 @@
+#copy on write
+
+func address(o: UnsafeRawPointer) {
+  print("address: \(Int(bitPattern: o))")
+}
+
+var arr1 = [1, 2, 3]
+var arr2 = arr1
+
+address(arr1) //address: 105553133388704
+address(arr2) //address: 105553133388704
+
+func address(o: UnsafeRawPointer) {
+  print("address: \(Int(bitPattern: o))")
+}
+
+var arr1 = [1, 2, 3]
+var arr2 = arr1
+
+arr2.append(4)
+
+address(arr1) //address: 105553154755744
+address(arr2) //address: 105553135788672
+
+COW Механизм копирует поведение reference types для value types, до первых изменений.
+
+Реализован только для String, Array, Dictionary, Set.
+
+https://habr.com/ru/articles/673372/
