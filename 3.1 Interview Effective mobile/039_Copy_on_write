@@ -1,5 +1,7 @@
 #copy on write
 
+https://habr.com/ru/articles/673372/
+
 func address(o: UnsafeRawPointer) {
   print("address: \(Int(bitPattern: o))")
 }

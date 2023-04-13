@@ -1,3 +1,8 @@
+# ARC, stack, heap
+
+https://habr.com/ru/companies/otus/articles/649329/
+https://habr.com/ru/companies/hh/articles/546856/
+
 Для хранения объектов Swift использует две структуры данных: стек и куча.
 Управление распределением памяти:
   - выделение памяти под объект (аллокацию)

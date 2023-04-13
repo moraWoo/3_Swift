@@ -1,4 +1,7 @@
 #problems concurrency
+
+https://medium.com/german-gorelkin/race-8936927dba20
+
 Problems:
 - Race condition (Состояние гонки)
 - Resource contention (конкуреция за ресурс)
