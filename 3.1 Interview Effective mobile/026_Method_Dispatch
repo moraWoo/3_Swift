@@ -1,0 +1,127 @@
+#method dispatch
+https://habr.com/ru/companies/simbirsoft/articles/673636/
+
+Диспетчеризация в Swift — это механизм, при котором программа выбирает, какие инструкции выполнить при вызове метода. Диспетчеризация происходит каждый раз, когда вызывается метод. Многим кажется, что это происходит так:
+
+1. Вызов метода --> 2. Диспетчеризация --> 3. Обработка метода
+
+Типы диспетчеризации:
+  - Direct Dispatch (статическая)
+  - Table Dispatch (динамическая)
+      - Virtual Table
+      - Witness Table
+  - Message Dispatch (самая динамическая диспетчеризация)
+
+1. "Direct Dispatch"
+Direct Dispatch — это самый быстрый способ отправки метода, часто называют статической диспетчеризацией. Однако прямая отправка наиболее ограничивающая с точки зрения программирования и недостаточно динамична для ООП. У всех value-объектов (например, структуры) используется Direct Dispatch.
++ самая быстрая дисп.
+- принципы ООП теряются (наследование)
+
+Способы:
+
+"Final Class"
+// MARK: Example 1 - Final Class
+final class ClassExample1 {
+    // MARK: Direct Dispatch
+    func doSomething() {
+        print("Example 1 - Final Class")
+    }
+}
+
+"Protocol Extension"
+// MARK: Example 2 - Protocol Extension
+extension SomeProtocol {
+    // MARK: Direct Dispatch
+    func doSomething() {
+        print("Example 2 - Protocol Extension")
+    }
+}
+class ClassExample2: SomeProtocol {}
+let classExample2 = ClassExample2()
+classExample2.doSomething()
+
+"Class Extension"
+// MARK: Example 3 - Class Extension
+class ClassExample3 {}
+
+extension ClassExample3 {
+    // MARK: Direct Dispatch
+    func doSomething() {
+        print("Example 3 - Class Extension")
+    }
+}
+let classExample3 = ClassExample3()
+classExample3.doSomething()
+
+"Access Control"
+// MARK: Example 4 - Access Control
+class ClassExample4 {
+    func doSomething() {
+        doSomethingPrivate()
+    }
+
+    // MARK: Direct Dispatch
+    private func doSomethingPrivate() {
+        print("Example 4 - Access Control")
+    }
+}
+
+2.1 "Virtual Table"
+Virtual Table используется в наследовании. Для каждого класса и его наследника (сабкласса) создается виртуальная таблица (пример приведён ниже), по которой центральный процессор понимает, где искать нужную ссылку на метод для его выполнения. Главный минус динамической диспетчеризации в том, что ее скорость существенно ниже, чем у статической.
+
++ принципы ООП
+- скорость ниже чем Direct
+
+// MARK: Example 5 - Virtual Table
+class ClassExample5 {
+    func doSomething() {
+        print("Example 5 - Virtual Table")
+    }
+}
+
+class SubclassExample5: ClassExample5 {
+    override func doSomething() {
+        print("Override for subclass")
+    }
+
+    func doSomething2() {
+        print("Method of subclass")
+    }
+}
+
+2.2 "Witness Table"
+Witness Table используется для реализации протоколов и создается для каждого класса, реализовавшего протокол. По этой таблице центральный процессор понимает, где искать нужную ссылку на метод для его выполнения. Главный минус Witness Table такой же, как и у Virtual Table — скорость существенно ниже, чем у Direct Dispatch.
+
++ Полиморфизм
+- Скорость такая же Virtual Table
+- Отсутствует наследование
+
+// MARK: Example 6 - Witness Table
+protocol ProtocolExample6 {
+    func doSomething()
+}
+
+class ClassExample6: ProtocolExample6 {
+    func doSomething() {
+        print("Example 6 - Witness Table")
+    }
+}
+
+class AnotherClassExample6: ProtocolExample6 {
+    func doSomething() {
+        print("Hello World")
+    }
+}
+
+Создается протокол и два класса, которые реализуют этот протокол, для каждого из этих классов создается Witness Table.
+
+3. "Message Dispatch"
+Message Dispatch — это самый динамичный вызов метода с помощью Objective-C. Message Dispatch работает в рантайме и показывает, какой метод вызывать, то есть проверяет это в реальном времени. Message Dispatch лежит в основе KVO (и соответственно в реактивном программировании), UIAppearance, CoreData. Так как Message Dispatch работает в рантайме, соответственно, можно подменять реализацию методов — это называется Method Swizzling. Method Swizzling позволяет подменить метод вашим в рантайме, оставляя оригинальную имплементацию доступной. А также в рантайме можно менять экземпляры класса.
+
+Message Dispatch часто используется для тестирования кода. Редко его можно встретить в проде, так как это не очень безопасный вызов и относится к самой медленной диспетчеризации. Но иногда он встречается и в проде, когда существующая библиотека не может обеспечить нам нужный результат и разработчик делает замену метода на свой в рантайме с помощью Method Swizzling.
+
++ Method Swizzling
++ Наивысшая динамичность
+- Скорость такая же Virtual Table
+
+Для реализации Message Dispatch требуется префикс "@objc dynamic", или можно добавить @objcMembers перед классом, тогда все его методы станут с префиксом @objc по дефолту.
