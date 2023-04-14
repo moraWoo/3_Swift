@@ -133,3 +133,79 @@ ready (готова к исполнению)   - cancelled (уничтожена
 executing (выполняется)       /
   |
 finished (закончена)
+
+open class Operation: NSObject {
+  open func start()
+  open func main()
+  open var isCancelled: Bool { get }
+  open func cancel()
+
+  open var isExecuting: Bool { get }
+  open var isFinished: Bool { get }
+  open var isAsynchronous: Bool { get }
+  open var isReady: Bool { get }
+
+  open var completionBlock: (() -> Swift.Void)?
+  open var qualityOfService: QualityOfService
+  open var name: String?
+}
+создание экземпляра класса OperationQueue
+let operationQueue = OperationQueue()
+
+print(Thread.current)
+
+var result: String?
+let concatOperation = BlockOperation {
+  result = "The Swift" + " " + "Developers"
+  print(result ?? "")
+  print(Thread.current)
+}
+//concatOperation.start()
+//print(result!)
+
+let queue = OperationQueue()
+queue.addOperation(concatOperation)
+// <_NSMainThread: 0x6000021881c0>{number = 1, name = main}
+// The Swift Developers
+// <NSThread: 0x600002194000>{number = 5, name = (null)}
+
+Можно без блока кода:
+print(Thread.current)
+let queue1 = OperationQueue()
+queue1.addOperation {
+  print("test")
+  print(Thread.current)
+}
+// <_NSMainThread: 0x6000018141c0>{number = 1, name = main}
+// test
+// <NSThread: 0x6000018104c0>{number = 7, name = (null)}
+
+==========
+При наследовании от Thread
+
+//print(Thread.current)
+//class MyThread: Thread {
+//  override func main() {
+//    print("Test main thread")
+//    print(Thread.current)
+//  }
+//}
+//let myThread = MyThread()
+//myThread.start()
+
+print(Thread.current)
+class OperationA: Operation {
+  override func main() {
+    print(Thread.current)
+    print("Test operation")
+  }
+}
+
+let operationA = OperationA()
+//operationA.start()
+let queue = OperationQueue()
+queue.addOperation(operationA)
+
+// <_NSMainThread: 0x6000014cc1c0>{number = 1, name = main}
+// <NSThread: 0x6000014c4e80>{number = 4, name = (null)}
+// Test operation
