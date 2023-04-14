@@ -1,0 +1,135 @@
+# concurrency
+Потоки - комбинация структур уровня ядра.
+
+Thread
+Operation
+GCD
+
+Параллельная очередь:
+Поток 1(Thread): ------------
+Поток 2(Thread): ------------
+
+Последовательные потоки (очередь):
+Поток 1(Thread): --  --  --  -- -
+Поток 2(Thread):   --  --  --  - -
+
+Асинхронный поток:
+Поток 1 Main(UI): ------------
+Поток 2 (Thread):     -    - -
+
+
+Синхронизация потоков это постановка в очередь.
+
+
+# QOS (Quality of Service)
+User_Interactive - Пользователь прям сейчас взаимодействует с UI. Самый высокий приоритет
+User_Initiated - Пользователь просит что-то сделать. User может немного подождать, но не затягивая. Тоже высокий приоритет
+Default
+Utility - Юзер не видит, не влияет на UI. Выполняется какая-то работа
+Background - Сегодня, завтра, может выполнится, в фоновом режиме.
+Unspecified
+
+# barrier
+Барьеры GCD делают одну интересную вещь — они заставляют очередь временно не начинать новые задачи и ждут, пока все работающие в очереди задачи закончат свою работу, а затем выполняют свое замыкание.
+
+Как только барьер начинает выполнять свое замыкание, он обеспечивает, чтобы очередь не выполняла никакие другие замыкания в течение этого времени и по существу работает как синхронная функция. Как только замыкание с барьером заканчивается, очередь возвращается к своей обычной работе, обеспечивая гарантию того, что никакая запись не будет проводиться одновременно с чтением или другой записью.
+
+public func append(_ value: T) {
+  queue.async(flags: .barrier) {
+  self.array.append(value)
+  }
+}
+
+# mutex
+
+
+# semaphore
+семафор может принимать несколько потоков сразу
+mutex может принимать только один поток
+
+let semaphore = DispatchSemaphore(value: 1)
+queue.async {
+  semaphore.wait() //-1
+  sleep(3)
+  print("method 1")
+  semaphore.signal()
+}
+
+# Operation
+
+
+# GCD
+queue - очередь
+
+тут мы управляем только очередями (queue), а не потоками, потоками управляет IOS
+queue:
+closure {}, closure {}, closure() \
+Thread1 (FIFO) ---------------------closure{}-> CP
+
+main queue - серийная последовательная очередь
+
+Очередь одна, но есть два типа:
+serial queues:
+closure {}, closure {}, closure() ---> Thread
+
+здесь система выбирает в каких потоках будут выполняться задачи
+concurrent queue:
+closure {}       ---> Thread1
+      closure {} ---> Thread2
+closure {}       ---> Thread3
+
+очередь это абстракция в GCD
+
+у очереди могут быть задачи могут иметь синхронное(sync) и асинхронное(async) выполнение задач
+
+тут задачи выполняются последовательно(sync), но в разных потоках
+Thread1 closure {}  ---block--- closure {}
+Thread2 ---block--- closure {}  ---block---
+Thread3 closure {}  ---block--- closure {}
+
+тут задачи выполняются параллельно(async), но в разных потоках
+Thread1       closure {}
+Thread2 closure {}
+Thread3 closure {} closure {} closure {}
+
+Глобальные очереди
+# main queue
+
+main queue UI {} - UI {} - UI {} - UI {} - UI {} - main thread
+main очередь - serial, для нее зарезервирован main thread системой
+
+Шаги к успеху:
+
+Системой зарезервированы глобальные очереди
+1. DispatchQueue.global и DispatchQueue.main их всего 5 штук
+в global мы можем можем помещать синхронное и асинхронное выполнение задач
+
+2. Нужно выбрать приоритет
+
+"наивысший приоритет"
+let userInteractiveQueue = DispatchQueue.global(qos: .userInteractive)
+let userIninitiatedQueue = DispatchQueue.global(qos: .userIninitiated)
+let utilityQueue = DispatchQueue.global(qos: .utility)
+
+"самый низкий приоритет"
+let backgroundQueue = DispatchQueue.global(qos: .background)
+"по умолчанию"
+let defaultQueue = DispatchQueue.global()
+
+3. Решить синхронное или асинхронное выполение задач (.sync, .async) на каком-то потоке
+
+Если вызвать метод sync на main потоке, то произойдет (deadlock) взаимная блокировка приложения
+
+# Operation
+Это абстрактный класс представляющий код и данные, связанные с задачей
+OperationQueue - Операционная очередьвыполняет свои очереди Operation объектов на основеих приоритета и готовности. После добавления в операционную очередь операция остается в очереди, пока не сообщит, что она завершена с ее задачей.
+
+Operation life Cycle
+
+pending (отложенная)          \
+  |
+ready (готова к исполнению)   - cancelled (уничтожена)
+  |
+executing (выполняется)       /
+  |
+finished (закончена)
