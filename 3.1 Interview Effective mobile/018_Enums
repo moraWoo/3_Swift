@@ -1,16 +1,103 @@
 # enums
-Перечисления (enums) в Swift представляют собой тип данных, который позволяет создавать новый тип, состоящий из набора определенных значений.
+Перечисления (enums) в Swift представляют собой тип данных, который позволяет создавать новый тип, состоящий из конечного набора значений.
 
 Перечисления определяются с помощью ключевого слова enum и могут содержать одно или несколько значений, которые могут быть именованными или безымянными. В Swift каждый элемент перечисления имеет тип перечисления, который позволяет использовать его в качестве отдельного типа данных.
 
-Например, вот как можно определить перечисление, которое представляет собой типы банковских счетов:
-enum AccountType {
-    case checking
-    case savings
-    case investment
+Преимущества:
+- Улучшает читаемость кода
+- Можно описать классами или структурами, но если нам не нужно излишество то стоит  использовать enum
+
+"mutating"
+enum Direction {
+  case north
+  case south
+  case west
+  case east
+
+  mutating functurn90clockwise() {
+    switch self {
+      case .west:
+        self = .north
+      case .east:
+        self = .south
+      case .north:
+        self = .east
+      case .south:
+        self = .west
+    }
+  }
 }
-Здесь мы определили перечисление AccountType, которое содержит три элемента: checking, savings и investment. Теперь мы можем создавать переменные и константы, которые используют тип AccountType, например:
-let accountType: AccountType = .savings
+var direction = Direction.west
+direction = .south
+direction.functurn90clockwise()
+
+switch self {
+  case .west:
+    print("west")
+  case .east:
+    print("east")
+  case .north:
+    print("north")
+  case .south:
+    print("south ")
+}
+// west
+
+# protocol caseIterable
+
+Protocol "CaseIterable" дает доступ коллекциям всех кейсов enum, enum должен быть без ассоциативных типов.
+
+enum Direction: CaseIterable {
+  case north
+  case south
+  case west
+  case east
+}
+let direction = Direction.allCases
+
+# raw value
+
+enum Direction: String, CaseIterable {
+  case north // название строки будет такое же как название кейса
+  case south = "South"
+  case west = "West"
+  case east
+}
+for enumValue in Direction.allCases {
+  print(enumValue)
+}
+// north
+// south
+// west
+// east
+for enumValue in Direction.allCases {
+  print(enumValue.rawValue)
+}
+// north
+// South
+// West
+// east
+
+# Initializing from raw value, Failable initializer
+let direction = Direction(rawValue: "West") //west
+
+# implicity assigned raw value
+
+enum Direction: Int, CaseIterable {
+  case north = 77
+  case south
+  case west
+  case east
+}
+for enumValue in Direction.allCases {
+  print(enumValue)
+}
+// 77
+// 78
+// 79
+// 80
+
+
 
 Перечисления в Swift могут также содержать дополнительные значения, которые могут быть связаны с каждым элементом. Это называется связанными значениями (associated values) и позволяет создавать более сложные перечисления, которые могут хранить дополнительную информацию.
 
