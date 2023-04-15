@@ -1,5 +1,3 @@
-# enums
-
 # associated values
 
 enum Barcode {
