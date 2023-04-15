@@ -1,9 +1,98 @@
 # concurrency
+
+процесс (программа) и поток (струтура внутри процесса)
+
+"concurrency" - это когда потоков(задач) больше чем количество ядер процессора и задачи должны выполняться параллельно, они они выполняются так: сначала выполняется часть первой задачи, потом часть второй, потом опять первой и тд.
+context switching - затратная операция для процессора.
+
+"parallelism" - это когда количество потоков(задач) равно количеству ядер, и задачи выполняются параллельно
 Потоки - комбинация структур уровня ядра.
+
+GCD
+
+2 типа очередей(queue):
+  - "serial"
+  - "concurrent"
+
+"serial queue"
+closure {}, closure {}, closure() ---> Thread
+
+здесь система выбирает в каких потоках будут выполняться задачи
+"concurrent queue"
+closure {}       ---> Thread1
+      closure {} ---> Thread2
+closure {}       ---> Thread3
+
+Queue types:
+  - Main (UI). Serial queue
+  - Global - Concurrent queues(параллельные). 4 такие очереди с разными приоритетами: "high", "default", "low" and "background".
+  - Custom. Сами можем создать serial, concurrent.
+
+Выполнение задач прожет происходить синхронно и асинхронно.
+
+Если с главной очереди отправить кложур на другую очередь "синхронно", то та очередь с которой отправили (здесь главная) заблокируется и будет ждать пока не закончится работа кложур. Если асинхронно, то главная очередь не заблокируется.
+
+Чем отличается асинхроность от параллелелизма?
+
+Cинхронность и асинхронность - это способ взаимодействия между очередями
+Параллелизм() - это концепция(принцип) на которой строятся все устройства с возможностью работы параллельно.
+А concurrent queue - тип queue, который лишь частично реализует принцип concurrency
+
+Получение очередей:
+let mainQueue = DispatchQueue.main
+let backgroundQueue = DispatchQueue.global(qos: DispatchQoS)
+
+Создание очередей:
+"serial queue"
+let serialQueue = DispatchQueue(label: "myQueue1")
+"concurrent queue"
+let concurrentQueue = DispatchQueue(label: "myQueue2", attributes: .concurrent)
+
+Добавление closure на выполнение в главную очередь из методов:
+"синхронно"
+DispatchQueue.main.sync {
+  // code
+}
+"асинхронно"
+DispatchQueue.main.async {
+  // code
+}
+
+Добавление задачи на выполнение после задержки:
+
+DispatchQueue.main.asyncAfter(deadline: .now() + delayInSeconds) {
+  // code
+}
+
+Очередь параллельная. Но отправление на печать асинхронно "async", соответственно мы получаем числа в разном порядке.
+let myQueue = DispatchQueue(label: "my", attributes: .concurrent)
+for i in 0...10000 {
+  myQueue.async {
+    print(i)
+  }
+}
+Если мы отправим синхронно, то по не выполнится принт итерация for не произойдет, соответственно числа печатаются в правильном порядке.
+for i in 0...10000 {
+  myQueue.sync {
+    print(i)
+  }
+}
+
+"Deadlock"
+let myQueue = DispatchQueue(label: "my")
+myQueue.async {
+  print("AAAAAA")
+  myQueue.sync {
+    print("BBBBBB")
+  }
+  print("CCCCCC")
+}
 
 Thread
 Operation
 GCD
+
+
 
 Параллельная очередь:
 Поток 1(Thread): ------------
@@ -22,10 +111,10 @@ GCD
 
 
 # QOS (Quality of Service)
-User_Interactive - Пользователь прям сейчас взаимодействует с UI. Самый высокий приоритет
+User_Interactive - Пользователь прям сейчас взаимодействует с UI. Самый высокий приоритет. Приоритет такой же как у Main очереди.
 User_Initiated - Пользователь просит что-то сделать. User может немного подождать, но не затягивая. Тоже высокий приоритет
 Default
-Utility - Юзер не видит, не влияет на UI. Выполняется какая-то работа
+Utility - Юзер не видит, не влияет на UI. Выполняется какая-то работа. Например, скачивание файлов.
 Background - Сегодня, завтра, может выполнится, в фоновом режиме.
 Unspecified
 
@@ -54,8 +143,6 @@ queue.async {
   print("method 1")
   semaphore.signal()
 }
-
-# Operation
 
 
 # GCD

@@ -1,0 +1,118 @@
+# async await
+Позволяет запускать и писать асинхронные, не блокирующие функции, также как обычные синхронные функции
+
+Task для асинхронных функций это тоже самое что thread для синхронных
+
+- Bce async функции, выполняются, как часть какого-либо async Task
+- Task выполняет одну функцию за раз, без какой-либо параллельности
+- Может создавать дочерние Task (childTask), которые как раз выполняются параллельно
+- TaskGroup создает childTasks программно.
+Task выполняет одну функцию за раз
+
+Task состояния:
+- Suspended
+- Running
+- Completed
+
+import UIKit
+import Foundation
+
+class Vegetable {
+  let id: Int
+  var alreadyChopped = false
+
+  init(id: Int) {
+    self.id = id
+  }
+  func chopped(completion: @escaping ((Vegetable) -> Void)) {
+    print("Vegetable \(id) starts chop")
+    alreadyChopped = true
+    Thread.sleep(forTimeInterval: 2)
+    print("Vegetable \(id) ends chop")
+    completion(self)
+  }
+}
+
+func gatherRawVeggies() -> [Vegetable] {
+  [Vegetable(id: 1), Vegetable(id: 2)]
+}
+
+func chopVegetables(completion: @escaping (([Vegetable]) -> Void)) {
+  let rawVeggies: [Vegetable] = gatherRawVeggies()
+  var choppedVeggies: [Vegetable] = []
+
+  let queue = OperationQueue()
+
+  for rawVeggie in rawVeggies {
+    let operation = BlockOperation {
+      rawVeggie.chopped { choppedVeggie in
+        choppedVeggies.append(choppedVeggie)
+      }
+    }
+    queue.addOperation(operation)
+  }
+  queue.addBarrierBlock {
+    completion(choppedVeggies)
+  }
+}
+
+chopVegetables { veggies in
+  for veggie in veggies {
+    print("\(veggie.id) is chopped \(veggie.chopped)")
+  }
+}
+
+// Vegetable 1 starts chop
+// Vegetable 2 starts chop
+// Vegetable 2 ends chop
+// Vegetable 1 ends chop
+// 2 is chopped (Function)
+второй овощ не очищен, что говорит об утечке памяти
+
+
+import UIKit
+import Foundation
+
+class Vegetable {
+  let id: Int
+  var alreadyChopped = false
+
+  init(id: Int) {
+    self.id = id
+  }
+  func chopped() async throws -> Vegetable {
+    print("Vegetable \(id) starts chop")
+    alreadyChopped = true
+    Thread.sleep(forTimeInterval: 2)
+    print("Vegetable \(id) ends chop")
+    return self
+  }
+}
+
+func gatherRawVeggies() -> [Vegetable] {
+  [Vegetable(id: 1), Vegetable(id: 2)]
+}
+
+func chopVegetables() async throws -> [Vegetable] {
+  let rawVeggies: [Vegetable] = gatherRawVeggies()
+  var choppedVeggies: [Vegetable] = []
+
+  for rawVeggie in rawVeggies {
+    choppedVeggies.append(try await rawVeggie.chopped())
+  }
+  return choppedVeggies
+}
+
+Task.init {
+  let veggies = try await chopVegetables()
+  for veggie in veggies {
+    print("\(veggie.id) is chopped \(String(describing: veggie.chopped))")
+  }
+}
+
+// Vegetable 1 starts chop
+// Vegetable 1 ends chop
+// Vegetable 2 starts chop
+// Vegetable 2 ends chop
+// 1 is chopped (Function)
+// 2 is chopped (Function)
