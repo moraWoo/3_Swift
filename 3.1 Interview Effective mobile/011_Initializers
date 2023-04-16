@@ -1,6 +1,7 @@
 #initilizers
 
-Инициализатор (initializer) в Swift - это специальный метод, который используется для инициализации экземпляра класса, структуры или перечисления до его первого использования. Он вызывается при создании нового объекта и используется для установки начальных значений свойств объекта.
+Инициализатор (initializer) в Swift - это специальный метод, который используется для подготовки экземпляра класса, структуры или перечисления к его использованию.
+Он вызывается при создании нового объекта и используется для установки начальных значений свойств объекта.
 
 Синтаксис инициализатора выглядит следующим образом:
 init(parameters) {
@@ -15,77 +16,30 @@ init(parameters) {
   - Required (обязательный иниализатор)
   - Designated (назначенный иниализатор)
 
-1. "Default"
-Дефолтный инициализатор - инициализатор без параметров, который создается автоматически, если в классе или структуре не определен ни один инициализатор.
+Фазы инициализации:
+1. Должны быть проставлены все значения для stored property. Снизу вверх, от child к базовому классу.
+2. Мы можем изменять значения которые были проставлены. Сверху вниз от базового класса к последнему child.
 
-class Car {
-    var name = ""
+В "классах" 2 типа инициализаторов (неограничено количество):
+1. "Designated" - самый главный
+2. "Convinience" - дополнительный
+
+Правила инициализации в классах в наследовании:
+1. Designated инициализатор (init(property)) должен вызывать другой designated со своего супер класса:
+init(language: String = "Swift") {
+  self.language = language
+  super.init(name: "[UNKNOWN]", salary: 600)
 }
+2. Convinience инициализатор должен вызывать другой инициализатор из того же класса.
+3. Convenience инициализатор должен в итоге вызывать один из designated инициализаторов.
 
-//Эти записи одинаковые
+Существует 4 safety check:
+1. Designated должен проинициализировать все stored properties
+2. Designated должен делегировать вверх в супер класс свою инициализацию перед тем как какие-то значения присваивать в какие-то property.
+3. Вызывать convinience перед тем как что-то менять в property
+4. Должны вызвать функции самого класса до того как все его значения проинициализированы и установлены.
 
-class Car {
-    var name: String
-
-    init() {
-        self.name = ""
-    }
-}
-
-let tesla = Car()
-tesla.name = "Tesla"
-
-2. "Memberwise"
-Swift будет автоматически синтезировать инициализатор для структур на основании свойств этой структуры, если вы не предоставите собственных инициализаторов init().
-
-- только в структурах, не в классах
-- если установить собственный инициализатор, то поэлементный пропадет
-
-struct Rectangle {
-  var width = 0
-  var height = 0
-}
-
-//Можно также написать вот так, тогда поэлементный пропадет
-
-struct Rectangle {
-  var width: Int
-  var height: Int
-
-  init(width: Int = 0, height: Int = 0) {
-    self.width = width
-    self.height = height
-  }
-}
-
-let square = Rectangle(width: 10, height: 10)
-
-3. "Failable" инициализатор – это инициализатор, который может вернуть какое-либо значение или может вернуть nil. Это своего рода иниализатор для опционалов.
-
-struct Temperature {
-    var celsius: Double
-
-    init?(fahrenheit: Double) {
-        if fahrenheit < -459.67 {
-            return nil
-        }
-        celsius = (fahrenheit - 32) * 5 / 9
-    }
-}
-
-let boilingPoint = Temperature(fahrenheit: 212) // создание объекта Temperature
-let absoluteZero = Temperature(fahrenheit: -500) // инициализация может вернуть nil, так как значение -500 некорректно
-
-4. "Required"
-Обязательный инициализатор как следует из его названия – это инициализатор, который обяательно должен быть реализован во всех подклассах данного класса.
-
-class Vehicle {
-    required init() {
-        // Этот инициализатор должен быть реализован в подклассе
-    }
-}
-
-5. "Designated"
+1. "Designated"
 Особый метод класса или структуры, который выполняет инициализацию всех свойств экземпляра класса или структуры и обеспечивает правильный порядок инициализации в цепочке наследования.
 
 class Circle {
@@ -102,7 +56,7 @@ class Circle {
 let earth = Circle(radius: 6371.0)
 print(earth.circumference) // 40030.17
 
-6. "Convenience"
+2. "Convenience"
 Инициализатор, который предоставляет удобный способ инициализации объекта, не обязательно инициализируя все его свойства.
 В отличие от назначенных инициализаторов, которые обязательно должны инициализировать все свойства класса или структуры, convenience инициализаторы не требуют инициализации всех свойств.
 
@@ -158,6 +112,103 @@ print(car1.self) //"__lldb_expr_15.Car\n"
 print(car2.color) //"black\n"
 print(car3.numberOfWheels) //"4\n"
 print(car4.numberOfWheels) //"4\n"
+
+3. "Memberwise"
+Swift будет автоматически синтезировать инициализатор для структур на основании свойств этой структуры, если вы не предоставите собственных инициализаторов init().
+
+- только в структурах, не в классах
+- если установить собственный инициализатор, то поэлементный пропадет
+
+struct Rectangle {
+  var width = 0
+  var height = 0
+}
+
+//Можно также написать вот так, тогда поэлементный пропадет
+
+struct Rectangle {
+  var width: Int
+  var height: Int
+
+  init(width: Int = 0, height: Int = 0) {
+    self.width = width
+    self.height = height
+  }
+}
+
+let square = Rectangle(width: 10, height: 10)
+
+4. "Failable" инициализатор – это инициализатор, который может вернуть какое-либо значение или может вернуть nil. Это своего рода иниализатор для опционалов.
+
+struct Temperature {
+    var celsius: Double
+
+    init?(fahrenheit: Double) {
+        if fahrenheit < -459.67 {
+            return nil
+        }
+        celsius = (fahrenheit - 32) * 5 / 9
+    }
+}
+
+let boilingPoint = Temperature(fahrenheit: 212) // создание объекта Temperature
+let absoluteZero = Temperature(fahrenheit: -500) // инициализация может вернуть nil, так как значение -500 некорректно
+
+enum Planets {
+  case mer
+  case ven
+  case earth
+
+  init?(number: Int) {
+    switch number {
+      case 1: self = .mer
+      case 2: self = .ven
+      case 3: self = .earth
+      default: return nil
+    }
+  }
+}
+
+let planet = Planets(number: 1) // mer
+
+5. "Default"
+Дефолтный инициализатор - инициализатор без параметров, который создается автоматически, если в классе или структуре не определен ни один инициализатор.
+
+class Car {
+    var name = ""
+}
+
+// Эти записи одинаковые
+
+class Car {
+    var name: String
+
+    init() {
+        self.name = ""
+    }
+}
+
+let tesla = Car()
+tesla.name = "Tesla"
+
+6. "Required"
+Обязательный инициализатор как следует из его названия – это инициализатор, который обяательно должен быть реализован во всех подклассах данного класса.
+
+class Vehicle {
+    required init() {
+        // Этот инициализатор должен быть реализован в подклассе
+    }
+}
+
+# вычисляяемое stored propertiy
+class SomeClass {
+  let someProperty: SomeType = {
+    // some code
+    return someValue
+  }()
+}
+
+==================================
 
 1. Назначенный инициализатор должен вызывать вспогательный инициализатор из своего непосредственного суперкласса.
 
@@ -222,3 +273,56 @@ enum CompassPoint {
         }
     }
 }
+
+# slava belii
+## MemberWise Initializer
+=====================
+
+struct Human {
+  var name: String = "[UNKNOWN]" // инициализация property
+  var salaryInUSD: Double
+
+  init() {
+    self.salaryInUSD = 500 //зарплату инициализируем тут, а name выше в property
+  }
+
+  init(name: String, salary: Double) {
+    self.name = name
+    self.salaryInUSD = salary
+
+    self.myFunc()
+  }
+
+  init(name: String, salaryInUAH: Double) {
+    self.name = name
+    self.salaryInUSD = salaryInUAH * 36.6
+  }
+
+  init(name: String, salaryInBitcoin: Double) {
+    self.init(name: name, salary: salaryInBitcoin * 19_000)
+  }
+
+  func myFunc() {
+    print(name)
+  }
+}
+
+var human = Human(name: "Ildar", salaryInBitcoin: 0.1)
+human.name //Ildar
+human.salaryInUSD // 1900
+
+если необходимо сохранить инициализатор по умолчанию и добавить свои, то нужно их писать в extension
+struct Human {
+  var name: String = "[UNKNOWN]" // инициализация property
+  var salaryInUSD: Double
+}
+
+extension Human {
+  init() {
+    self.salaryInUSD = 500 //зарплату инициализируем тут, а name выше в property
+  }
+}
+
+var human = Human()
+
+## Initializer в наследовании
