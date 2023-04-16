@@ -1,0 +1,140 @@
+# property wrappers
+синтаксический сахар (ни на что не влияет, только на вид записи)
+
+- нельзя использовать с глобальными переменными и с глобальными константами
+- нельзя использовать с lazy
+
+@propertyWrapper
+struct TwentyOrLess {
+  private var number = 0
+  var wrappedValue: Int {
+    get { return number }
+    set { number = min(newValue, 20) }
+  }
+}
+
+struct SmallRectangle {
+  @TwentyOrLess var height: Int
+  @TwentyOrLess var width: Int
+}
+
+let rect = SmallRectangle()
+rect.height = 10
+rect.height //10
+rect.height = 30 // 20
+rect.width
+
+вот так преобразует код  сам компилятор
+"вместо:"
+struct SmallRectangle {
+  @TwentyOrLess var height: Int
+  @TwentyOrLess var width: Int
+}
+"станет:"
+struct SmallRectangle {
+  private var _height = TwentyOrLess()
+  private var _width = TwentyOrLess()
+
+  var height: Int {
+    get { return _height.wrappedValue }
+    set { _height.wrappedValue = newValue }
+  }
+  var width: Int {
+    get { return _width.wrappedValue }
+    set { _width.wrappedValue = newValue }
+  }
+}
+
+# initializing
+
+@propertyWrapper
+struct TwentyOrLess {
+  private var number: Int
+  private var maximumValue: Int
+
+  var wrappedValue: Int {
+    get { return number }
+    set { number = min(newValue, 20) }
+  }
+
+  init() {
+    number = 0
+    maximumValue = 20
+  }
+
+  init(number: Int = 0, maximumValue: Int) {
+    self.number = number
+    self.maximumValue = maximumValue
+  }
+}
+
+struct SmallRectangle {
+  //  _height = TwentyOrLess(number: Int, maximumValue: Int)
+  @TwentyOrLess(number: 16, maximumValue: 20) var height: Int
+  @TwentyOrLess(number: 15) var width: Int
+}
+
+var rect = SmallRectangle()
+rect.height // 16
+rect.width // 15
+
+# projected value
+
+@propertyWrapper
+struct TwentyOrLess {
+  private var number: Int
+  private var maximumValue: Int
+  // projected value
+  private(set) var projectedValue: Bool // проверка вышли ли мы за наши пределы или нет
+
+  var wrappedValue: Int {
+    get { return number }
+    set {
+      if newValue > maximumValue {
+        projectedValue = true
+      } else {
+        projectedValue = false
+      }
+      number = min(newValue, 20) }
+  }
+
+  init() {
+    number = 0
+    maximumValue = 20
+    projectedValue = false
+  }
+
+  init(number: Int = 0, maximumValue: Int = 0) {
+    self.number = number
+    self.maximumValue = maximumValue
+    projectedValue = false
+  }
+}
+
+struct SmallRectangle {
+//  _height = TwentyOrLess(number: Int, maximumValue: Int)
+  @TwentyOrLess(number: 16, maximumValue: 20) var height: Int
+  @TwentyOrLess(number: 15) var width: Int
+}
+
+var rect = SmallRectangle()
+
+rect.height = 11
+rect.width = 21
+
+rect.$height // false
+rect.$width // true
+
+# локальные переменные
+
+func example() {
+  @TwentyOrLess var localVar: Int
+  localVar = 25
+  print(localVar)
+}
+
+example()
+
+# существующие property wrappers
+Список
+https://www.hackingwithswift.com/quick-start/swiftui/all-swiftui-property-wrappers-explained-and-compared
