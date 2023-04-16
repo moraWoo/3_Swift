@@ -97,20 +97,44 @@ for enumValue in Direction.allCases {
 // 79
 // 80
 
+# associated values
+позволяют хранить любые данные в enum и эти данные будут привязаны к конкретному кейсу
 
-
-Перечисления в Swift могут также содержать дополнительные значения, которые могут быть связаны с каждым элементом. Это называется связанными значениями (associated values) и позволяет создавать более сложные перечисления, которые могут хранить дополнительную информацию.
-
-Например, вот как можно определить перечисление, которое представляет собой различные типы напитков в кофейной машине и связанные значения, такие как количество сахара и молока:
-enum CoffeeType {
-    case espresso
-    case americano
-    case latte(sugar: Int, milk: Bool)
+enum Direction {
+  case north(damage: Int, equipment: [String], Int)
+  case south(health: Int)
+  case west(name: String)
+  case east(money: Double)
+}
+// сохраняем значения
+var direction = Direction.north(damage: 40, equipment: ["hammer", "knife"], 10)
+// достаем значения
+switch direction {
+  case .west:
+    print("west")
+  case .east:
+    print("east")
+  case .north(let gjhgj):
+    print(gjhgj)
+  case .south:
+    print("south ")
 }
 
-Здесь мы определили перечисление CoffeeType, которое содержит три элемента: espresso, americano и latte. Элемент latte имеет связанные значения sugar и milk, которые указывают количество сахара и наличие молока в напитке. Теперь мы можем создавать переменные и константы, которые используют тип CoffeeType, и обращаться к связанным значениям:
+//(damage: 40, equipment: ["hammer", "knife"], 10)
 
-let myCoffee = CoffeeType.latte(sugar: 2, milk: true)
-print("Мой кофе содержит \(myCoffee.sugar) ложки сахара и \(myCoffee.milk ? "молоко" : "нет молока")")
+# if case синтаксис
+если нужно проверить только один кейс
+if case .north = direction {
+  print("замерзнуть")
+}
 
-В целом, перечисления в Swift представляют собой удобный способ определения новых типов данных, которые содержат ограниченный набор значений. Они могут использоваться в качестве типов данных для переменных, констант и параметров функций, а также для создания более сложных типов данных, которые могут хранить дополнительную информацию с помощью связанных значений. Перечисления также могут содержать методы и использоваться в качестве аргументов для операторов switch для обработки разных сценариев в коде.
+# recursive enumeration, indirect enum
+enum может содержать один или несколько enum
+indirect enum MessageType {
+  case image(UIImage)
+  case text(String)
+  case file(Data)
+  case reply(MessageType)
+}
+
+let messageType = MessageType.reply(MessageType.image(UIImage()))

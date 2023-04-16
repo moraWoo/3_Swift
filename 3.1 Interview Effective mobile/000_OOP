@@ -1,0 +1,79 @@
+OOP совокупность методов (как и что нужно делать) и имеющих общий философский подход
+
+Чем отличается класс от объекта класса?
+- Класс это тип или описание того как выглядит тип.
+- Экземпляр класса (объект) - это что-то готовое по этому описанию (то что уже лежит в памяти)
+
+ООП:
+"Наследование"
+  Особенность - переиспользование кода, забираем часть функциональности у родительского класса и можно дополнить.
+  Откуда мы наследуем - базовый(супер) класс. В Swift только один родитель.
+  Наследники - это подтипы
+"Инкапсуляция"
+    Ограничение доступа одних компонентов к другим, т.е. сокрытие данных, которые нельзя поменять. Открываем для чтения, но закрываем от изменения. А можно закрыть чтение и запись.
+"Полиморфизм"
+  Полиморфизм подтипов - способность классов переопределять методы, свойства и инициализаторы классов родитителей.
+  Метод override
+// Полиморфизм
+Не можем переопределять хранимые свойства
+Можем переопредлять методы, инициализаторы, вычисляемые свойства
+class Teacher {
+  let name: String //
+  var description: String {
+    return "Привет. Я \(name)"
+  }
+
+  init(name: String) {
+    self.name = name
+  }
+
+  func teach() {
+    print("Я учу")
+  }
+}
+
+class IOSTeacher: Teacher {
+  let speciality: Strin
+
+  override var description: String {
+    return "Привет. Я \(name), я разраб."
+  }
+
+  init(name: String, speciality: String) {
+    self.speciality = speciality
+    super.init(name: name)
+  }
+
+  // переопределяем инициализатор по имени, т.е. специальность меняется по имени
+  override init(name: String) {
+    self.specility = "Frontend"
+    super.init(name: name)
+  }
+
+  func swiftCoding() {
+    print("я прогаю на Swift")
+  }
+
+  override func teach() {
+    print("Я учу разработке")
+  }
+}
+
+let teacher = Teacher(name: "Марк")
+teacher.name
+teacher.description
+teacher.teach()
+
+let iOSTeacher = IOSTeacher(name: "Влад", speciality: "Front")
+iOSTeacher.speciality
+iOSTeacher.swiftCoding()
+iOSTeacher.name
+iOSTeacher.teach()
+
+// после переопределения инициализатора
+let iOSTeacher2 = IOSTeacher(name: "Андрей")
+iOSTeacher2.speciality // Frontend
+iOSTeacher2.description
+
+//Переопределение методов
+iOSTeacher2.teach() // Я учу разработке
