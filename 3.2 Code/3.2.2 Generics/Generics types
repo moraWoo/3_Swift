@@ -1,0 +1,55 @@
+enum StackError: Error {
+  case Empty(message: String)
+}
+
+public struct Stack<T> {
+  var array: [T] = []
+
+  init(capacity: Int) {
+    array.reserveCapacity(capacity)
+  }
+
+  public mutating func push(element: T) {
+    array.append(element)
+  }
+
+  public mutating func pop() -> T? {
+    return array.popLast()
+  }
+
+  public func peek() throws -> T {
+    guard !isEmpty(), let lastElement = array.last else {
+      throw StackError.Empty(message: "Array is empty")
+    }
+    return lastElement
+  }
+
+  func isEmpty() -> Bool {
+    return array.isEmpty
+  }
+}
+
+extension Stack: CustomStringConvertible {
+  public var description: String {
+    let elements = array.map{ "\($0)"}.joined(separator: "\n")
+    return elements
+  }
+}
+
+var stack = Stack<Int>(capacity: 10)
+print("stack1: \(stack)")
+stack.push(element: 1)
+stack.push(element: 2)
+print("stack2: \(stack)")
+stack.pop()
+stack.pop()
+print("stack3: \(stack)")
+
+var stack1 = Stack<String>(capacity: 10)
+print("stack1: \(stack1)")
+stack1.push(element: "str1")
+stack1.push(element: "str2")
+print("stack2: \(stack1)")
+stack1.pop()
+stack1.pop()
+print("stack3: \(stack1)")
