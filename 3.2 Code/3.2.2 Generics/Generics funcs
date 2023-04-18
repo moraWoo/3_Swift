@@ -4,3 +4,10 @@ func min<T: Comparable>(_ x: T, _ y: T) -> T {
 }
 
 min(10, 5) // 5
+
+// Тип T может быть любым названием
+func min<U: Comparable>(_ x: U, _ y: U) -> U {
+  return y < x ? y : x
+}
+
+min(10, 7) //
