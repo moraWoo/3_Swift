@@ -1,0 +1,14 @@
+// Расширение существующего типа, чтобы обеспечить соответствие протоколу
+protocol Container {
+  associatedtype Item
+  mutating func append(_ item: Item)
+  func count() -> Int
+  subscript(i: Int) -> Item { get }
+}
+
+extension Array: Container {
+  func count() -> Int {
+    //
+    return 0
+  }
+}

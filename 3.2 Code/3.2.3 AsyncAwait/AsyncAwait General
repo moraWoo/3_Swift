@@ -1,0 +1,35 @@
+import Foundation
+
+// более чисто писать код
+// вместо @escaping и comleption handler можно использовать async await
+
+func fetchWeatherHistory() async -> [Int] {
+  (1...365).map { _ in Int.random(in: -35...35) }
+}
+
+func calculateAverageTemperature(for records: [Int]) async -> Int {
+  let total = records.reduce(0, +)
+  let average = lround(Double(total) / Double(records.count))
+  return average
+}
+
+func upload(result: Int) async -> String {
+  return "OK"
+}
+
+// Работа с асинхронными функциями в 2 этапа:
+// 1. Помечаем функции как асинхронные, мы можем вызвать эти функции в асинхронном потоке
+// 2. Вызываем асинхронные функции с помощью await
+
+func processWeather() async {
+  let records = await fetchWeatherHistory() // функция возвращает массив целочисленных значений
+  let average = await calculateAverageTemperature(for: records)
+  let response = await upload(result: average)
+  print("Records: \(records)")
+  print("Average: \(average)")
+  print("Server response: \(response)")
+}
+
+Task {
+  await processWeather()
+}

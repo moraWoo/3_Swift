@@ -1,0 +1,12 @@
+protocol Stackable {
+  associatedtype Element: Equatable
+  mutating func push(element: Element)
+  mutating func pop() -> Element?
+  func peek() throws -> Element
+  func isEmpty() -> Bool
+  func count() -> Int
+  subscript(i: Int) -> Element { get }
+}
+
+// Тип элемента стека должен соответствовать протоколу Equatable
+// https://habr.com/ru/companies/otus/articles/463789/

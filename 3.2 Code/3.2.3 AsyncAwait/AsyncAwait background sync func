@@ -1,0 +1,153 @@
+import Foundation
+
+enum LactionError: Error {
+  case unknown
+}
+// синхронная функция
+func fibonacci(of number: Int) -> Int {
+  var first = 0
+  var second = 1
+
+  for _ in 0..<number {
+    let previous = first
+    first = second
+    second = previous + first
+  }
+
+  return first
+}
+// вызов синхронной функции в асинхронном потоке
+func setFibonacciSequence() async {
+  let task = Task { () -> [Int] in
+    var numbers: [Int] = []
+    for iteration in 0..<50 {
+      let result = fibonacci(of: iteration)
+      numbers.append(result)
+    }
+    return numbers
+  }
+  let result = await task.value
+  print("The first 50 number in the Fibonacci sequence are: \(result)")
+}
+
+Task {
+  await setFibonacciSequence()
+}
+
+//The first 50 number in the Fibonacci sequence are: [0, 1, 1, 2, 3, 5, 8, 13, 21, 34, 55, 89, 144, 233, 377, 610, 987, 1597, 2584, 4181, 6765, 10946, 17711, 28657, 46368, 75025, 121393, 196418, 317811, 514229, 832040, 1346269, 2178309, 3524578, 5702887, 9227465, 14930352, 24157817, 39088169, 63245986, 102334155, 165580141, 267914296, 433494437, 701408733, 1134903170, 1836311903, 2971215073, 4807526976, 7778742049]
+
+func printNew() async {
+  print("Hello")
+}
+
+Task {
+  await printNew()
+}
+
+// Задачи Task позволяют настроить порядок выполнения асинхронных задач
+func runMultipleCalculations() async throws {
+  let taskOne = Task {
+    (0..<50).map(fibonacci)
+  }
+
+  let taskTwo = Task {
+    try await printNew()
+  }
+
+  let resultOne = await taskOne.value
+  let resultTwo = try await taskTwo.value
+  print("The first 50 number in the Fibonacci sequence are: \(resultOne)")
+  print(resultTwo)
+}
+
+Task {
+  try await runMultipleCalculations()
+}
+
+// это Structure Concurrency
+
+// Приоритеты .high, .low, .background, .low, .medium, .userInitiated, .utility
+  let taskOne = Task(priority: .high) {
+    (0..<50).map(fibonacci)
+  }
+
+// Sleeping task
+
+func cancelSleepingTask() async {
+  let task = Task { () -> String in
+    print("Starting")
+    try await Task.sleep(nanoseconds: 1_000_000_000)
+    try Task.checkCancellation()
+    return "Done"
+  }
+
+  Task<String, any Error>.yield() // Дать выполнить работу для пользовательского интерфейса, чтобы не забивать поток одной задачей
+  task.cancel() // отмена задачи
+
+  do {
+    let result = try await task.value
+    print("Result: \(result)")
+  } catch {
+    print("Task was cancelled")
+  }
+}
+
+Task {
+  await cancelSleepingTask()
+}
+
+// Группировка задач только если подзадачи (group.addTask) возвращают один тип данных (у нас String) и могут возвращать не в той последовательности, что определена
+
+func printMessages() async {
+  let string = await withTaskGroup(of: String.self) { group -> String in
+    group.addTask { "Hello" }
+    group.addTask { "From" }
+    group.addTask { "A" }
+    group.addTask { "Task" }
+    group.addTask { "Group" }
+    var message: [String] = []
+
+    for await value in group {
+      message.append(value)
+    }
+    return message.joined(separator: " ")
+  }
+  print(string)
+}
+
+Task {
+  await printMessages()
+}
+
+// Если данные возвращаются в асинхронных функциях разные и нужна очередность то нужно применить async let
+
+struct UserData {
+  let name: String
+  let friends: [String]
+  let highScores: [Int]
+}
+
+func getUserName () async -> String {
+  "Tim Cook"
+}
+
+func getFriends() async -> [String] {
+  ["Eric", "John", "Frank"]
+}
+
+func gethighScores() async -> [Int] {
+  [42, 23, 16, 15, 8, 4]
+}
+
+func printUserDetails() async {
+  async let name = getUserName()
+  async let friends = getFriends()
+  async let scores = gethighScores()
+
+  let user = await UserData(name: name, friends: friends, highScores: scores)
+  print("Hello, my name is \(user)")
+}
+
+Task {
+  await printUserDetails()
+}
